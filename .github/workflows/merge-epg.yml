@@ -1,0 +1,33 @@
+name: Merge EPG Every 5 Hours
+
+on:
+  schedule:
+    - cron: '0 */5 * * *'  # every 5 hours
+  workflow_dispatch:
+
+jobs:
+  merge-epg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run merge script
+        run: node merge-epg.js
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add public/merged_epg.xml
+          git commit -m "Auto-update merged EPG" || echo "No changes"
+          git push
